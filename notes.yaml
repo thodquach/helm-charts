@@ -1,0 +1,42 @@
+## Create charts repo on github
+git clone git@github.com:thodquach/helm-charts.git
+mkdir charts
+helm create charts/app1
+helm create charts/app2
+echo ".deploy" >> .gitignore
+git add .
+git commit -m 'Initial Commit'
+git push origin master
+
+## Create github page
+git checkout --orphan gh-pages
+rm -rf charts
+git add . --all
+git commit -m 'initial gh-pages'
+git push origin gh-pages
+
+## Generate chart tar gz
+git checkout master
+cd charts && helm package app1
+mv app1-0.1.0.tgz ../
+
+git checkout gh-pages
+mv ../app1-0.1.0.tgz .
+
+## Generate index.yaml
+touch index.yaml
+git add index.yaml
+git commit -a -m "add index.yaml"
+git push --set-upstream origin gh-pages
+
+## Add your own repo to your localhost
+helm repo index helm-charts --url https://thodquach.github.io/helm-charts/
+git add app1-0.1.0.tgz
+git commit -a -m "change index"
+git push origin gh-pages
+
+## Fetch your chart to verify all of things you have done
+helm repo add helm-charts https://thodquach.github.io/helm-charts/
+helm repo list
+helm repo update
+helm fetch helm-charts/app1
